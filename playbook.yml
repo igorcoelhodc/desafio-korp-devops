@@ -19,7 +19,7 @@
           - gnupg
           - lsb-release
           - python3-pip
-          state: present
+        state: present
       when: ansible_os_family == "Debian"
 
     - name: Instalar Docker
@@ -35,14 +35,14 @@
         enabled: yes
       when: ansible_os_family == "Debian"
 
-    - name: Instalar Docker Compose
-      apt:
-        name: docker-compose-v2
-        state: present
-      when: ansible_os_family == "Debian"
+    - name: Instalar Docker
+      get_url:
+        url: https://github.com/docker/compose/releases/download/v2.27.0/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
 
     - name: Executar Docker Compose para subir os serviços
-      command: docker compose up -d --build
+      shell: "docker-compose up -d --build || docker compose up -d --build"
       args:
         chdir: "{{ playbook_dir }}"
 
@@ -52,7 +52,7 @@
 
     - name: Validar o funcionamento do serviço via Curl
       uri:
-        url: http://localhost:8080/desafio-korp
+        url: http://localhost:80/desafio-korp
         method: GET
         return_content: yes
       register: curl_response
