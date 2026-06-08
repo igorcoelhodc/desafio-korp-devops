@@ -37,13 +37,13 @@ type Response struct {
 	Horario string `json:"horario"`
 }
 
-func desafioKorpHandler(w http.ResponseWriter, r *http.Request) {
-	httpRequestsTotal.WithLabelValues("/desafio-korp").Inc()
+func projetoKorpHandler(w http.ResponseWriter, r *http.Request) {
+	httpRequestsTotal.WithLabelValues("/projeto-korp").Inc()
 
 	w.Header().Set("Content-Type", "application/json")
 
 	resp := Response{
-		Nome:	"Desafio Korp",
+		Nome:	"Projeto Korp",
 		Horario: time.Now().UTC().Format(time.RFC3339),
 	}
 
@@ -54,7 +54,7 @@ func desafioKorpHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/desafio-korp", desafioKorpHandler)
+	http.HandleFunc("/projeto-korp", projetoKorpHandler)
 
 	http.Handle("/metrics", promhttp.Handler())
 
