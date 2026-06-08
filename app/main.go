@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -28,16 +29,16 @@ var (
 func init() {
 	prometheus.MustRegister(httpRequestsTotal)
 	prometheus.MustRegister(upMetric)
-	upMetrics.Set(1)
+	upMetric.Set(1)
 }
 
 type Response struct {
-	Nome	string ˋjson:"nome"ˋ
-	Horario	string ˋjson:"horario"ˋ
+	Nome    string `json:"nome"`
+	Horario string `json:"horario"`
 }
 
 func desafioKorpHandler(w http.ResponseWriter, r *http.Request) {
-	httpRequestTotal.WithLabelValues("/desafio-korp").Inc()
+	httpRequestsTotal.WithLabelValues("/desafio-korp").Inc()
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -46,7 +47,10 @@ func desafioKorpHandler(w http.ResponseWriter, r *http.Request) {
 		Horario: time.Now().UTC().Format(time.RFC3339),
 	}
 
-	json.NewEncoder(w).Encode(resp)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		http.Error(w, "erro ao codificar resposta", http.StatusInternalServerError)
+		return
+	}
 }
 
 func main() {
@@ -54,5 +58,8 @@ func main() {
 
 	http.Handle("/metrics", promhttp.Handler())
 
-	http.ListenAndServe(":8080", nil)
+	log.Println("serving on :8080")
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		log.Fatalf("server error: %v", err)
+	}
 }
