@@ -1,0 +1,62 @@
+---
+- name: Provisionamento do Ambiente do Desafio Korp Informatica
+  hosts: localhost
+  connection: local
+  become: true
+
+  tasks:
+    - name: Atualizar o cache do apt (Debian/Ubuntu)
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Checar instalação de dependências
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - python3-pip
+          state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Instalar Docker
+      apt:
+        name: docker.io
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Checar se o Docker está rodando
+      service:
+        name: docker
+        state: started
+        enabled: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Instalar Docker Compose
+      apt:
+        name: docker-compose-v2
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Executar Docker Compose para subir os serviços
+      command: docker compose up -d --build
+      args:
+        chdir: "{{ playbook_dir }}"
+
+    - name: Aguardar 5 segundos para incialização dos serviços
+      pause:
+        seconds: 5
+
+    - name: Validar o funcionamento do serviço via Curl
+      uri:
+        url: http://localhost:8080/desafio-korp
+        method: GET
+        return_content: yes
+      register: curl_response
+
+    - name: Exibir o JSON retornado no console
+      debug:
+        msg: "Resposta do servidor HTTP: {{ curl_response.content }}"
