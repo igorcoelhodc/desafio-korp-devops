@@ -10,7 +10,7 @@ services:
       context: ./app
       dockerfile: Dockerfile
     image: http-server-desafio-korp:latest
-    container_name: http-server-projeto-korp
+    container_name: http-server-desafio-korp
     networks:
       - korp_network
 
@@ -24,7 +24,7 @@ services:
     networks:
       - korp_network
     depends_on:
-      - http-server-projeto-korp
+      - http-server-desafio-korp
 
   prometheus:
     image: prom/prometheus:latest
